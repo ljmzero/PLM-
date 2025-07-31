@@ -38,7 +38,12 @@ namespace PLM信息导出
             }
 
 
-            string str = @"select 
+
+            string str = "";
+            string where = "";
+            if (comboBox1.Text == "导出料号")
+            {
+                 str = @"select 
 					(select partdefine0256 from part_extend where part_id=(select top 1 part_id from part_base where part_code= A.part_code order by create_time DESC)) as 旧物料
 
                     ,A.part_code as 物料编码,A.part_name as 物料名称, REPLACE(REPLACE(REPLACE(A.spec, '@', ''), '_', ''), '无', '') as 规格,A.originalfig_id as 图号,
@@ -67,13 +72,11 @@ namespace PLM信息导出
  	                       when A.part_state ='0' then '设计状态' 
 	                       when A.part_state ='3' then '申请状态' 
  	                       when A.part_state ='2' then '变更状态' end)
-                    as PLM状态
-                     from  part_base A,part_extend B,unit C where A.part_id=B.part_id  AND A.unit_id=C.unit_id ";
+                    as PLM状态,
+					  US.user_name AS '创建人'
+                     from  part_base A join  sys_user US  on A.create_person = US.user_id,part_extend B,unit C where A.part_id=B.part_id  AND A.unit_id=C.unit_id 
+                        ";
 
-
-            string where = "";
-            if (comboBox1.Text == "导出料号")
-            {
                 if (comboBox2.Text == "修改时间")
                 {
                     where += " and a.update_time>='" + dateTimePicker3.Value.ToString("yyyy-MM-dd HH:mm:ss") + "' and a.update_time<='" + dateTimePicker4.Value.ToString("yyyy-MM-dd HH:mm:ss") + "' and isnull(a.update_time,'')!=''";
