@@ -43,10 +43,42 @@ namespace PLM信息导出
             string where = "";
             if (comboBox1.Text == "导出料号")
             {
-                 str = @"select 
-					(select partdefine0256 from part_extend where part_id=(select top 1 part_id from part_base where part_code= A.part_code order by create_time DESC)) as 旧物料
+                //            str = @"select 
+                //(select partdefine0256 from part_extend where part_id=(select top 1 part_id from part_base where part_code= A.part_code order by create_time DESC)) as 旧物料
 
-                    ,A.part_code as 物料编码,A.part_name as 物料名称, REPLACE(REPLACE(REPLACE(A.spec, '@', ''), '_', ''), '无', '') as 规格,A.originalfig_id as 图号,
+                //               ,A.part_code as 物料编码,A.part_name as 物料名称,REPLACE(REPLACE(A.spec, '@', ''), '_', '') as 规格,A.originalfig_id as 图号,
+
+                //                (case when A.kind='1' then '零件' 
+                //                    when A.kind='2' then '部件' 
+                //                   when A.kind='3' then '总成' 
+                //                      when A.kind='4' then '产品' 
+                //                    when A.kind='5' then '原材料' end)
+                //                 as 种类,B.partdefine0274 AS
+                //               中类代号,c.unit_name  AS 计量单位, B.partdefine0292 as 停用代号,  b.partdefine0273 as 仓位,
+                //               (case when a.source='01' then '自制件' 
+                //                     when a.source='02' then '外购件' 
+                //                  when a.source='03' then '内购' 
+                //                  when a.source='04' then '待自制' 
+                //                  when a.source='05' then '虚拟件' 
+                //                  when a.source='06' then 'SMT' 
+                //                  when a.source='07' then '加工' 
+                //                  when a.source='08' then '托工' 
+                //                  when a.source='09' then '制板' 
+                //                  when a.source='10' then '组装' end) 
+                //                as 属性,
+                //               A.part_ver as 物料版本,B.partdefine0253 as 环保类别 ,B.partdefine0248 AS 物料状态,B.partdefine0263 as 重量
+                //               ,a.create_time as 创建时间,A.update_time AS  修改时间 ,
+                //                (case when A.part_state ='1' then '归档状态' 
+                //                    when A.part_state ='0' then '设计状态' 
+                //                   when A.part_state ='3' then '申请状态' 
+                //                    when A.part_state ='2' then '变更状态' end)
+                //               as PLM状态,
+                //  US.user_name AS '创建人'
+                //                from  part_base A join  sys_user US  on A.create_person = US.user_id,part_extend B,unit C where A.part_id=B.part_id  AND A.unit_id=C.unit_id 
+                //                   ";
+                str = @"select 
+				     A.compare_part AS 原件号
+                    ,A.part_code as 物料编码,A.part_name as 物料名称,REPLACE(REPLACE(A.spec, '@', ''), '_', '') as 规格,A.originalfig_id as 图号,
  
                      (case when A.kind='1' then '零件' 
  	                       when A.kind='2' then '部件' 
@@ -90,6 +122,56 @@ namespace PLM信息导出
             }
             else if (comboBox1.Text == "导出新增BOM")
             {
+                //str = @" WITH BOMList AS (
+                //                    SELECT 
+                //                        A.part_code,
+                //                        B.bom_id AS bom_id,
+                //                        A.part_ver,
+                //                        B.create_time,
+                //                        B.state,
+                //                        B.create_person,
+                //                  B.part_id
+                //                    FROM 
+                //                        part_base A
+                //                    JOIN 
+                //                        Dbom B ON A.part_id = B.part_id
+                //                )
+                //                SELECT 
+                //                    E.partdefine0256 AS 母件旧料号,
+                //                    BL.part_ver AS 母件版本,
+                //                    BL.part_code AS 母件代号,
+                //                    A.part_code AS 子件代号,
+                //                    A.part_ver AS 子件版本,
+                //                    C.amount AS 用量,
+                //                    C.dbomnodedefine0003 AS 基数,
+                //                    C.dbomnodedefine0005 AS 损耗率,
+                //                    ROW_NUMBER() OVER (PARTITION BY BL.part_code ORDER BY C.display_no) AS 序号,  -- 重新编号
+                //                    '' AS 制造部门,
+                //                    '' AS 帐套,
+                //                    '' AS 审核人名称,
+                //                    '' AS 审核人代号,
+                //                    C.location_number AS 组装位置,
+                //                    ex.partdefine0256 AS '子件旧物料',
+                //                    CASE 
+                //                        WHEN BL.state = '0' THEN '设计中' 
+                //                        WHEN BL.state = '2' THEN '归档'
+                //                        WHEN BL.state = '1' THEN '审批中'
+                //                    END AS 状态, 
+                //                 US.user_name AS '创建人',
+                //                    BL.create_time
+                //                FROM 
+                //                    BOMList BL
+                //                JOIN 
+                //                    dbom_node C ON BL.bom_id = C.bom_id
+                //                JOIN 
+                //                    part_base A ON C.part_id = A.part_id
+                //                JOIN 
+                //                    sys_user US ON BL.create_person = US.user_id
+                //                JOIN 
+                //                    part_extend ex ON A.part_id = ex.part_id
+                //                JOIN 
+                //                 part_extend E on BL.part_id=E.part_id
+                //    ";
                 str = @" WITH BOMList AS (
                                     SELECT 
                                         A.part_code,
@@ -105,10 +187,11 @@ namespace PLM信息导出
                                         Dbom B ON A.part_id = B.part_id
                                 )
                                 SELECT 
-                                    E.partdefine0256 AS 母件旧料号,
                                     BL.part_ver AS 母件版本,
+                                    E.compare_part AS 母件原件号,
                                     BL.part_code AS 母件代号,
                                     A.part_code AS 子件代号,
+                                    A.compare_part AS '子件原件号',
                                     A.part_ver AS 子件版本,
                                     C.amount AS 用量,
                                     C.dbomnodedefine0003 AS 基数,
@@ -119,7 +202,6 @@ namespace PLM信息导出
                                     '' AS 审核人名称,
                                     '' AS 审核人代号,
                                     C.location_number AS 组装位置,
-                                    ex.partdefine0256 AS '子件旧物料',
                                     CASE 
                                         WHEN BL.state = '0' THEN '设计中' 
                                         WHEN BL.state = '2' THEN '归档'
@@ -136,9 +218,7 @@ namespace PLM信息导出
                                 JOIN 
                                     sys_user US ON BL.create_person = US.user_id
                                 JOIN 
-                                    part_extend ex ON A.part_id = ex.part_id
-                                JOIN 
-	                                part_extend E on BL.part_id=E.part_id
+	                                part_base E on BL.part_id=E.part_id
                     ";
                 if (comboBox2.Text == "修改时间")
                 {
@@ -475,11 +555,11 @@ namespace PLM信息导出
                         break;
                     }
                 }
-                if (!allEmpty &&!string.IsNullOrWhiteSpace(dr[5].ToString()))
+                if (!allEmpty && !string.IsNullOrWhiteSpace(dr[5].ToString()))
                 {
-                        rowList.Add(dr);
+                    rowList.Add(dr);
                 }
-                    
+
             }
 
             return rowList;
