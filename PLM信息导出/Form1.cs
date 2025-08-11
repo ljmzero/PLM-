@@ -299,6 +299,12 @@ namespace PLM信息导出
                 dateTimePicker3.Enabled = false;
                 dateTimePicker4.Enabled = false;
 
+            }else if(comboBox1.Text.ToString().Trim() == "导出物料变更")
+            {
+                button2.Enabled = true;
+                button3.Enabled = false;
+                dateTimePicker1.Enabled = false;
+                dateTimePicker2.Enabled = false;
             }
             else
             {
